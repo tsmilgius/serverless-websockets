@@ -1,0 +1,21 @@
+{
+  "name": "tree-control-lambda",
+  "version": "1.0.0",
+  "description": "AWS lambda for handling wss messages",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tsmilgius.com",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.699.0",
+    "@aws-sdk/client-dynamodb": "^3.699.0",
+    "@aws-sdk/client-lambda": "^3.699.0",
+    "aws-lambda": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.146",
+    "@types/node": "^22.10.1"
+  }
+}

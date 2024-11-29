@@ -1,0 +1,66 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: noneorganization
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: tree-control-lambda
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  stage: ${opt:stage, 'dev'}
+
+  environment:
+    CLIENTS_TABLE: ${self:service}-${self:provider.stage}-clients
+    GW_URL:
+      Fn::Join:
+        - ""
+        - - "https://"
+          - Ref: WebsocketsApi
+          - ".execute-api."
+          - Ref: AWS::Region
+          - ".amazonaws.com/${sls:stage}"
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            # - dynamodb:Query
+            - dynamodb:Scan
+            # - dynamodb:GetItem
+            - dynamodb:PutItem
+            # - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.CLIENTS_TABLE}"
+
+functions:
+  websocketHandler:
+    handler: src/websocketHandler.handle
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+      - websocket:
+          route: message
+      - websocket:
+          route: $default
+      # - websocket:
+      #     route: sendMessage
+      # - websocket:
+      #     route: getClients
+resources:
+  Resources:
+    ClientsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.CLIENTS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
